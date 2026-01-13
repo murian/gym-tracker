@@ -19,6 +19,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
     defaultReps: 12,
     defaultSets: 3,
     defaultRestTime: 30,
+    imageUrl: '',
   });
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultReps: formData.defaultReps,
       defaultSets: formData.defaultSets,
       defaultRestTime: formData.defaultRestTime,
+      imageUrl: formData.imageUrl || undefined,
     });
 
     resetForm();
@@ -56,6 +58,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultReps: exercise.defaultReps || 12,
       defaultSets: exercise.defaultSets || 3,
       defaultRestTime: exercise.defaultRestTime || 30,
+      imageUrl: exercise.imageUrl || '',
     });
   };
 
@@ -70,6 +73,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultReps: formData.defaultReps,
       defaultSets: formData.defaultSets,
       defaultRestTime: formData.defaultRestTime,
+      imageUrl: formData.imageUrl || undefined,
     });
 
     resetForm();
@@ -92,6 +96,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultReps: 12,
       defaultSets: 3,
       defaultRestTime: 30,
+      imageUrl: '',
     });
     setIsAdding(false);
     setEditingId(null);
@@ -186,6 +191,30 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
                     onChange={(e) => setFormData({ ...formData, defaultRestTime: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Image URL (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="/images/exercises/your-image.jpg"
+                  />
+                  {formData.imageUrl && (
+                    <div className="mt-2">
+                      <img
+                        src={formData.imageUrl}
+                        alt="Preview"
+                        className="w-24 h-24 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex gap-3 mt-4">

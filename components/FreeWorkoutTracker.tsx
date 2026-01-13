@@ -139,7 +139,16 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
 
         return (
           <div key={exIndex} className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start gap-4 mb-4">
+              {exercise.imageUrl && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={exercise.imageUrl}
+                    alt={exercise.name}
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                </div>
+              )}
               <div className="flex-1">
                 <h4 className="text-lg font-bold text-gray-900">
                   {exercise.equipment && (

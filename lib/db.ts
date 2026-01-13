@@ -14,6 +14,7 @@ export interface Exercise {
   goalTime?: number;
   goalSpeed?: number;
   goalIncline?: number;
+  imageUrl?: string;
 }
 
 export interface ExerciseSet {
@@ -91,6 +92,7 @@ class Database {
         defaultReps: 10,
         defaultSets: 4,
         defaultRestTime: 60,
+        imageUrl: '/images/exercises/dumbbell-press.jpg',
       },
       {
         id: 'overhead-press',
@@ -100,6 +102,7 @@ class Database {
         defaultReps: 10,
         defaultSets: 3,
         defaultRestTime: 60,
+        imageUrl: '/images/exercises/overhead-press.jpg',
       },
       {
         id: 'inclined-dumbbell-press',
@@ -109,6 +112,7 @@ class Database {
         defaultReps: 10,
         defaultSets: 3,
         defaultRestTime: 60,
+        imageUrl: '/images/exercises/inclined-dumbbell-press.jpg',
       },
       {
         id: 'lateral-raises',
@@ -118,6 +122,7 @@ class Database {
         defaultReps: 15,
         defaultSets: 3,
         defaultRestTime: 45,
+        imageUrl: '/images/exercises/lateral-raises.jpg',
       },
       {
         id: 'triceps-dips',
@@ -127,6 +132,7 @@ class Database {
         defaultReps: 10,
         defaultSets: 3,
         defaultRestTime: 60,
+        imageUrl: '/images/exercises/triceps-dips.jpg',
       },
     ];
     this.saveToStorage();
