@@ -23,7 +23,16 @@ jobs:
 
       - name: Merge to main
         run: |
-          git fetch origin main
-          git checkout main
-          git merge --no-ff origin/claude/continue-project-ZzjvL -m "Auto-merge from claude/continue-project-ZzjvL"
-          git push origin main
+          git fetch origin main || echo "Main branch does not exist yet"
+
+          # Check if main branch exists on remote
+          if git ls-remote --heads origin main | grep main; then
+            echo "Main branch exists, merging..."
+            git checkout main
+            git merge --no-ff origin/claude/continue-project-ZzjvL -m "Auto-merge from claude/continue-project-ZzjvL"
+            git push origin main
+          else
+            echo "Main branch doesn't exist, creating it from claude branch..."
+            git checkout -b main
+            git push origin main
+          fi
