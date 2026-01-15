@@ -157,11 +157,21 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
           <select
             value={selectedExerciseId}
             onChange={(e) => setSelectedExerciseId(e.target.value)}
-            className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border-2 border-gray-400 rounded-lg bg-white text-gray-900 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-500 cursor-pointer"
+            style={{
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.5rem center',
+              backgroundSize: '1.5em 1.5em',
+              paddingRight: '2.5rem',
+            }}
           >
-            <option value="">Select an exercise...</option>
+            <option value="" className="text-gray-500">Select an exercise...</option>
             {availableExercises.map(exercise => (
-              <option key={exercise.id} value={exercise.id}>
+              <option key={exercise.id} value={exercise.id} className="text-gray-900 font-medium py-2 bg-white hover:bg-blue-100">
                 {exercise.equipment ? `${exercise.equipment} - ${exercise.name}` : exercise.name}
                 {exercise.workoutDay ? ` (Workout ${exercise.workoutDay})` : ''}
               </option>
