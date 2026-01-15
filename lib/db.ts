@@ -15,6 +15,7 @@ export interface Exercise {
   goalSpeed?: number;
   goalIncline?: number;
   imageUrl?: string;
+  workoutDay?: 1 | 2; // Day 1 or Day 2 workout split
 }
 
 export interface ExerciseSet {
@@ -93,6 +94,7 @@ class Database {
         defaultSets: 4,
         defaultRestTime: 60,
         imageUrl: '/images/exercises/dumbbell-press.jpg',
+        workoutDay: 1,
       },
       {
         id: 'overhead-press',
@@ -103,6 +105,7 @@ class Database {
         defaultSets: 3,
         defaultRestTime: 60,
         imageUrl: '/images/exercises/overhead-press.jpg',
+        workoutDay: 1,
       },
       {
         id: 'inclined-dumbbell-press',
@@ -113,6 +116,7 @@ class Database {
         defaultSets: 3,
         defaultRestTime: 60,
         imageUrl: '/images/exercises/inclined-dumbbell-press.jpg',
+        workoutDay: 1,
       },
       {
         id: 'lateral-raises',
@@ -123,6 +127,7 @@ class Database {
         defaultSets: 3,
         defaultRestTime: 45,
         imageUrl: '/images/exercises/lateral-raises.jpg',
+        workoutDay: 1,
       },
       {
         id: 'triceps-dips',
@@ -133,6 +138,63 @@ class Database {
         defaultSets: 3,
         defaultRestTime: 60,
         imageUrl: '/images/exercises/triceps-dips.jpg',
+        workoutDay: 1,
+      },
+      // Day 2 Exercises
+      {
+        id: 'lat-pulldown',
+        name: 'Pull-ups or Lat Pulldown',
+        equipment: 'CABLE / BAR',
+        category: 'Back',
+        defaultReps: 10,
+        defaultSets: 4,
+        defaultRestTime: 60,
+        imageUrl: '/images/exercises/lat-pulldown.jpg',
+        workoutDay: 2,
+      },
+      {
+        id: 'barbell-rows',
+        name: 'Barbell or Dumbbell Rows',
+        equipment: 'BARBELL / DUMBBELLS',
+        category: 'Back',
+        defaultReps: 10,
+        defaultSets: 4,
+        defaultRestTime: 60,
+        imageUrl: '/images/exercises/barbell-rows.jpg',
+        workoutDay: 2,
+      },
+      {
+        id: 'face-pulls',
+        name: 'Face Pulls',
+        equipment: 'CABLE',
+        category: 'Shoulders',
+        defaultReps: 15,
+        defaultSets: 3,
+        defaultRestTime: 45,
+        imageUrl: '/images/exercises/face-pulls.jpg',
+        workoutDay: 2,
+      },
+      {
+        id: 'bicep-curls',
+        name: 'Bicep Curls',
+        equipment: 'DUMBBELLS',
+        category: 'Biceps',
+        defaultReps: 11,
+        defaultSets: 3,
+        defaultRestTime: 45,
+        imageUrl: '/images/exercises/bicep-curls.jpg',
+        workoutDay: 2,
+      },
+      {
+        id: 'hammer-curls',
+        name: 'Hammer Curls',
+        equipment: 'DUMBBELLS',
+        category: 'Biceps',
+        defaultReps: 12,
+        defaultSets: 2,
+        defaultRestTime: 45,
+        imageUrl: '/images/exercises/hammer-curls.jpg',
+        workoutDay: 2,
       },
     ];
     this.saveToStorage();
@@ -145,6 +207,10 @@ class Database {
 
   getExercise(id: string): Exercise | undefined {
     return this.exercises.find(e => e.id === id);
+  }
+
+  getExercisesByDay(day: 1 | 2): Exercise[] {
+    return this.exercises.filter(e => e.workoutDay === day);
   }
 
   addExercise(exercise: Omit<Exercise, 'id'>): Exercise {
@@ -218,7 +284,7 @@ class Database {
     return true;
   }
 
-  // Get suggested weight for an exercise based on 10% weekly progression
+  // Get suggested weight for an exercise based on 5% weekly progression
   getSuggestedWeight(exerciseId: string, currentDate: string): number | null {
     // Find the most recent workout with this exercise BEFORE the current date
     const previousLogs = this.workoutLogs
