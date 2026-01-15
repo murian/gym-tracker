@@ -1,17 +1,24 @@
 # Gym Tracker
 
-A modern, fast, and responsive gym workout tracking application built with Next.js, React, and TypeScript. Track your Crossfit, HIIT, and Free Workout sessions with intelligent progression tracking.
+A modern, fast, and responsive gym workout tracking application built with Next.js, React, and TypeScript. Track your Crossfit, Pilates, Squash, and Free Workout sessions with intelligent 5% weekly progression tracking.
 
 ## Features
 
-- **Calendar View**: Visual calendar showing all your workout sessions
-- **3 Workout Types**:
-  - **Crossfit**: Simple activity logging
-  - **HIIT**: Simple activity logging
-  - **Free Workout**: Detailed exercise tracking with sets, reps, and weights
-- **Exercise Management**: Add, edit, and delete exercises with custom equipment and categories
-- **Progressive Overload**: Automatic 10% weight increase suggestions every week
-- **Progression Tracking**: Compare your actual performance vs. suggested progression
+- **Calendar View**: Visual calendar showing all your workout sessions with color-coded badges
+- **4 Workout Types**:
+  - **Crossfit** (Orange badge): Simple activity logging
+  - **Pilates** (Purple badge): Simple activity logging
+  - **Squash** (Green badge): Simple activity logging
+  - **Free Workout** (Blue badge): Detailed exercise tracking with sets, reps, and weights
+- **Exercise Management**: Add, edit, and delete exercises with custom equipment, categories, and images
+- **Exercise Images**: Visual thumbnails for each exercise (96x96px) in workout tracker
+- **Progressive Overload**: Automatic 5% weight increase suggestions every week
+- **Smart Progression Tracking**:
+  - Compares current performance vs. suggested progression
+  - Shows green checkmark when meeting or exceeding goals
+  - Shows blue alert when below suggested weight
+  - Only suggests increase after 7+ days since last workout
+- **Delete Workouts**: Remove any workout with confirmation dialog
 - **Modern UI**: Fast, responsive design with Tailwind CSS
 - **Persistent Storage**: Data saved in browser localStorage
 - **No Backend Required**: Works entirely in the browser
@@ -81,7 +88,7 @@ nvm use 18
 ### Logging a Workout
 
 1. Click on any date in the calendar
-2. Select your workout type (Crossfit, HIIT, or Free Workout)
+2. Select your workout type (Crossfit, Pilates, Squash, or Free Workout)
 3. Mark as completed if you've finished the workout
 4. Click "Save Workout"
 
@@ -90,11 +97,14 @@ nvm use 18
 1. After saving a Free Workout, click on the date again
 2. Add exercises from your exercise list
 3. For each exercise, you can:
+   - See exercise thumbnail image (if available)
    - Track multiple sets
    - Record reps, weight (kg), and rest time (seconds)
    - Mark sets as completed
-   - See suggested weight increases (10% weekly progression)
-   - Compare actual vs. suggested progression
+   - See suggested weight increases (5% weekly progression)
+   - Green checkmark when meeting/exceeding goals
+   - Blue alert when below suggested weight
+4. Delete entire workout using the "Delete Workout" button
 
 ### Managing Exercises
 
@@ -104,17 +114,26 @@ nvm use 18
    - Equipment (optional)
    - Category (optional)
    - Default reps, sets, and rest time
+   - Image URL (optional) - supports local or external images
 3. Edit or delete existing exercises
+4. Live image preview when adding/editing
 
 ### Pre-loaded Exercises
 
-The app comes with these default exercises:
-- RUN - Goal exercise time (Cardio)
-- DUMBBELLS - Chest press - flat bench
-- CABLE STATIONS 4 - Rowing - triangle (handle)
-- CABLE STATIONS 4 - Face pull
-- DAP ELT+ - French press
-- CABLE JUNGLE - Arm curl with bar
+The app comes with these default exercises (with images):
+- **Dumbbell Press** - 4 sets × 10 reps (Chest)
+- **Overhead Press** - 3 sets × 10 reps (Shoulders)
+- **Inclined Dumbbell Press** - 3 sets × 10 reps (Chest)
+- **Lateral Raises** - 3 sets × 15 reps (Shoulders)
+- **Triceps Dips** - 3 sets × 10 reps (Triceps)
+
+### Adding Exercise Images
+
+See `IMAGE_GUIDE.md` for detailed instructions on:
+- Adding images to exercises
+- Supported formats (JPG, PNG, WebP)
+- Image requirements and best practices
+- Using local vs. external image URLs
 
 ## Deployment
 
