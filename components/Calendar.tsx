@@ -120,9 +120,9 @@ export default function Calendar({ workoutLogs, onDateClick, selectedDate }: Cal
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
           {monthNames[month]} {year}
         </h2>
         <div className="flex gap-2">
@@ -143,19 +143,19 @@ export default function Calendar({ workoutLogs, onDateClick, selectedDate }: Cal
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 mb-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
         {dayNames.map(name => (
-          <div key={name} className="text-center text-sm font-semibold text-gray-600 py-2">
+          <div key={name} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-2">
             {name}
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {days}
       </div>
 
-      <div className="mt-6 flex gap-4 text-sm flex-wrap">
+      <div className="mt-4 sm:mt-6 flex gap-3 sm:gap-4 text-xs sm:text-sm flex-wrap">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">CF</div>
           <span className="text-gray-600">Crossfit</span>

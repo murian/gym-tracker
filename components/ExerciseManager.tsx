@@ -114,117 +114,117 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">Manage Exercises</h2>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Manage Exercises</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {(isAdding || editingId) && (
-            <div className="bg-blue-50 rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
+            <div className="bg-blue-50 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
                 {editingId ? 'Edit Exercise' : 'Add New Exercise'}
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Exercise Name *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., Chest press - flat bench"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Equipment
                   </label>
                   <input
                     type="text"
                     value={formData.equipment}
                     onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., DUMBBELLS"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Category
                   </label>
                   <input
                     type="text"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., Chest, Back, Legs"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Workout Type *
                   </label>
                   <select
                     value={formData.workoutDay}
                     onChange={(e) => setFormData({ ...formData, workoutDay: parseInt(e.target.value) as 1 | 2 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value={1}>Workout 1</option>
                     <option value={2}>Workout 2</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Default Reps
                   </label>
                   <input
                     type="number"
                     value={formData.defaultReps}
                     onChange={(e) => setFormData({ ...formData, defaultReps: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Default Sets
                   </label>
                   <input
                     type="number"
                     value={formData.defaultSets}
                     onChange={(e) => setFormData({ ...formData, defaultSets: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Default Rest Time (seconds)
                   </label>
                   <input
                     type="number"
                     value={formData.defaultRestTime}
                     onChange={(e) => setFormData({ ...formData, defaultRestTime: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Image URL (optional)
                   </label>
                   <input
                     type="text"
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="/images/exercises/your-image.jpg"
                   />
                   {formData.imageUrl && (
@@ -262,27 +262,27 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
           {!isAdding && !editingId && (
             <button
               onClick={() => setIsAdding(true)}
-              className="w-full mb-6 py-3 border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold"
+              className="w-full mb-4 sm:mb-6 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               Add New Exercise
             </button>
           )}
 
-          <div className="flex gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
             <button
               onClick={() => setDayFilter('all')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-semibold transition-colors ${
                 dayFilter === 'all'
                   ? 'bg-gray-800 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              All Exercises ({exercises.length})
+              All ({exercises.length})
             </button>
             <button
               onClick={() => setDayFilter(1)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-semibold transition-colors ${
                 dayFilter === 1
                   ? 'bg-blue-600 text-white'
                   : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
@@ -292,7 +292,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
             </button>
             <button
               onClick={() => setDayFilter(2)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-semibold transition-colors ${
                 dayFilter === 2
                   ? 'bg-purple-600 text-white'
                   : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
@@ -302,39 +302,39 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {filteredExercises.map(exercise => (
               <div
                 key={exercise.id}
-                className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 flex items-center justify-between transition-colors"
+                className="bg-gray-50 hover:bg-gray-100 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 sm:justify-between transition-colors"
               >
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                <div className="flex-1 min-w-0 w-full">
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
                     {exercise.equipment && (
-                      <span className="text-sm font-normal text-gray-500">{exercise.equipment} - </span>
+                      <span className="text-xs sm:text-sm font-normal text-gray-500">{exercise.equipment} - </span>
                     )}
-                    {exercise.name}
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${exercise.workoutDay === 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <span className="truncate">{exercise.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${exercise.workoutDay === 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                       Workout {exercise.workoutDay || 1}
                     </span>
                   </h4>
-                  <div className="flex gap-4 mt-1 text-sm text-gray-600">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-600">
                     {exercise.category && <span>Category: {exercise.category}</span>}
                     <span>{exercise.defaultSets} sets × {exercise.defaultReps} reps</span>
                     <span>{exercise.defaultRestTime}s rest</span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => handleEdit(exercise)}
-                    className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                    className="flex-1 sm:flex-initial p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
                     aria-label="Edit exercise"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(exercise.id)}
-                    className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                    className="flex-1 sm:flex-initial p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
                     aria-label="Delete exercise"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -345,7 +345,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
           </div>
 
           {filteredExercises.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-8 sm:py-12 text-sm sm:text-base text-gray-500">
               {exercises.length === 0
                 ? 'No exercises yet. Add your first exercise above.'
                 : `No exercises for ${dayFilter === 'all' ? 'this filter' : `Workout ${dayFilter}`}.`
