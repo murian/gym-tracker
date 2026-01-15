@@ -172,15 +172,15 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Workout Day *
+                    Workout Type *
                   </label>
                   <select
                     value={formData.workoutDay}
                     onChange={(e) => setFormData({ ...formData, workoutDay: parseInt(e.target.value) as 1 | 2 })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value={1}>Day 1</option>
-                    <option value={2}>Day 2</option>
+                    <option value={1}>Workout 1</option>
+                    <option value={2}>Workout 2</option>
                   </select>
                 </div>
                 <div>
@@ -288,7 +288,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
                   : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
               }`}
             >
-              Day 1 ({exercises.filter(e => e.workoutDay === 1).length})
+              Workout 1 ({exercises.filter(e => e.workoutDay === 1).length})
             </button>
             <button
               onClick={() => setDayFilter(2)}
@@ -298,7 +298,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
                   : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
             >
-              Day 2 ({exercises.filter(e => e.workoutDay === 2).length})
+              Workout 2 ({exercises.filter(e => e.workoutDay === 2).length})
             </button>
           </div>
 
@@ -315,7 +315,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
                     )}
                     {exercise.name}
                     <span className={`text-xs px-2 py-0.5 rounded-full ${exercise.workoutDay === 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                      Day {exercise.workoutDay || 1}
+                      Workout {exercise.workoutDay || 1}
                     </span>
                   </h4>
                   <div className="flex gap-4 mt-1 text-sm text-gray-600">
@@ -348,7 +348,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
             <div className="text-center py-12 text-gray-500">
               {exercises.length === 0
                 ? 'No exercises yet. Add your first exercise above.'
-                : `No exercises for ${dayFilter === 'all' ? 'this filter' : `Day ${dayFilter}`}.`
+                : `No exercises for ${dayFilter === 'all' ? 'this filter' : `Workout ${dayFilter}`}.`
               }
             </div>
           )}

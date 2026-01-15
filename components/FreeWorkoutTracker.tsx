@@ -119,7 +119,7 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            All Days
+            All Workouts
           </button>
           <button
             onClick={() => setDayFilter(1)}
@@ -129,7 +129,7 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
             }`}
           >
-            Day 1
+            Workout 1
           </button>
           <button
             onClick={() => setDayFilter(2)}
@@ -139,7 +139,7 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
                 : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
             }`}
           >
-            Day 2
+            Workout 2
           </button>
         </div>
 
@@ -153,7 +153,7 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
             {availableExercises.map(exercise => (
               <option key={exercise.id} value={exercise.id}>
                 {exercise.equipment ? `${exercise.equipment} - ${exercise.name}` : exercise.name}
-                {exercise.workoutDay ? ` (Day ${exercise.workoutDay})` : ''}
+                {exercise.workoutDay ? ` (Workout ${exercise.workoutDay})` : ''}
               </option>
             ))}
           </select>
