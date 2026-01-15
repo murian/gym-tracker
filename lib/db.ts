@@ -275,6 +275,10 @@ class Database {
     return this.workoutLogs.find(log => log.date === date);
   }
 
+  getWorkoutLogsByDate(date: string): WorkoutLog[] {
+    return this.workoutLogs.filter(log => log.date === date);
+  }
+
   addWorkoutLog(log: Omit<WorkoutLog, 'id'>): WorkoutLog {
     const newLog: WorkoutLog = {
       ...log,

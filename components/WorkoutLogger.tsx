@@ -6,40 +6,27 @@ import { Check, X } from 'lucide-react';
 
 interface WorkoutLoggerProps {
   selectedDate: string;
-  existingLog?: WorkoutLog;
   onSave: () => void;
   onCancel: () => void;
 }
 
-export default function WorkoutLogger({ selectedDate, existingLog, onSave, onCancel }: WorkoutLoggerProps) {
-  const [workoutType, setWorkoutType] = useState<WorkoutType>(existingLog?.type || 'crossfit');
-  const [completed, setCompleted] = useState(existingLog?.completed || false);
+export default function WorkoutLogger({ selectedDate, onSave, onCancel }: WorkoutLoggerProps) {
+  const [workoutType, setWorkoutType] = useState<WorkoutType>('free-workout');
+  const [completed, setCompleted] = useState(false);
 
   const handleSave = () => {
     const db = getDatabase();
+    db.addWorkoutLog({
+      date: selectedDate,
+      type: workoutType,
+      completed,
+    });
 
-    if (existingLog) {
-      db.updateWorkoutLog(existingLog.id, {
-        type: workoutType,
-        completed,
-      });
-    } else {
-      db.addWorkoutLog({
-        date: selectedDate,
-        type: workoutType,
-        completed,
-      });
-    }
+    // Reset form
+    setWorkoutType('free-workout');
+    setCompleted(false);
 
     onSave();
-  };
-
-  const handleDelete = () => {
-    if (existingLog && confirm('Are you sure you want to delete this workout?')) {
-      const db = getDatabase();
-      db.deleteWorkoutLog(existingLog.id);
-      onSave();
-    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -56,7 +43,7 @@ export default function WorkoutLogger({ selectedDate, existingLog, onSave, onCan
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          {existingLog ? 'Edit Workout' : 'Log Workout'}
+          Add Workout
         </h2>
         <button
           onClick={onCancel}
@@ -141,7 +128,7 @@ export default function WorkoutLogger({ selectedDate, existingLog, onSave, onCan
         {workoutType === 'free-workout' && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              For detailed exercise tracking, save this workout first, then click on the date again to add exercises.
+              After adding, click "View Details" to track exercises for this workout.
             </p>
           </div>
         )}
@@ -153,16 +140,14 @@ export default function WorkoutLogger({ selectedDate, existingLog, onSave, onCan
           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <Check className="w-5 h-5" />
-          Save Workout
+          Add Workout
         </button>
-        {existingLog && (
-          <button
-            onClick={handleDelete}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-          >
-            Delete
-          </button>
-        )}
+        <button
+          onClick={onCancel}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );

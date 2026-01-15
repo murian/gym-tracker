@@ -36,9 +36,9 @@ export default function Calendar({ workoutLogs, onDateClick, selectedDate }: Cal
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  const getWorkoutForDate = (day: number): WorkoutLog | undefined => {
+  const getWorkoutsForDate = (day: number): WorkoutLog[] => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return workoutLogs.find(log => log.date === dateStr);
+    return workoutLogs.filter(log => log.date === dateStr);
   };
 
   const getWorkoutTypeColor = (type: string) => {
@@ -78,7 +78,7 @@ export default function Calendar({ workoutLogs, onDateClick, selectedDate }: Cal
 
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const workout = getWorkoutForDate(day);
+    const workouts = getWorkoutsForDate(day);
     const isSelected = selectedDate === dateStr;
     const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
@@ -90,19 +90,26 @@ export default function Calendar({ workoutLogs, onDateClick, selectedDate }: Cal
           aspect-square p-2 rounded-lg border-2 transition-all
           ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-transparent hover:border-gray-300'}
           ${isToday ? 'ring-2 ring-green-500' : ''}
-          ${workout ? 'font-semibold' : 'font-normal'}
+          ${workouts.length > 0 ? 'font-semibold' : 'font-normal'}
           relative group
         `}
       >
         <div className="text-sm">{day}</div>
-        {workout && (
-          <div className={`
-            absolute bottom-1 left-1/2 -translate-x-1/2
-            ${getWorkoutTypeColor(workout.type)}
-            text-white text-xs px-1.5 py-0.5 rounded-full
-            font-bold
-          `}>
-            {getWorkoutTypeLabel(workout.type)}
+        {workouts.length > 0 && (
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+            {workouts.map((workout, idx) => (
+              <div
+                key={workout.id}
+                className={`
+                  ${getWorkoutTypeColor(workout.type)}
+                  text-white text-xs px-1 py-0.5 rounded-full
+                  font-bold
+                `}
+                style={{ fontSize: workouts.length > 2 ? '8px' : '10px' }}
+              >
+                {getWorkoutTypeLabel(workout.type)}
+              </div>
+            ))}
           </div>
         )}
         {isToday && (

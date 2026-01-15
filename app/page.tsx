@@ -15,7 +15,8 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [showExerciseManager, setShowExerciseManager] = useState(false);
-  const [currentLog, setCurrentLog] = useState<WorkoutLog | undefined>(undefined);
+  const [currentLogs, setCurrentLogs] = useState<WorkoutLog[]>([]);
+  const [selectedWorkoutLog, setSelectedWorkoutLog] = useState<WorkoutLog | undefined>(undefined);
 
   useEffect(() => {
     loadWorkouts();
@@ -29,56 +30,70 @@ export default function Home() {
   const handleDateClick = (date: string) => {
     setSelectedDate(date);
     const db = getDatabase();
-    const log = db.getWorkoutLogByDate(date);
-    setCurrentLog(log);
-
-    if (log && log.type === 'free-workout') {
-      setViewMode('detail');
-    } else {
-      setViewMode('log');
-    }
+    const logs = db.getWorkoutLogsByDate(date);
+    setCurrentLogs(logs);
+    setSelectedWorkoutLog(undefined);
+    setViewMode('log');
   };
 
   const handleSaveWorkout = () => {
     loadWorkouts();
     const db = getDatabase();
     if (selectedDate) {
-      const log = db.getWorkoutLogByDate(selectedDate);
-      setCurrentLog(log);
-      if (log && log.type === 'free-workout') {
-        setViewMode('detail');
-      } else {
-        setViewMode('calendar');
-        setSelectedDate(null);
-      }
+      const logs = db.getWorkoutLogsByDate(selectedDate);
+      setCurrentLogs(logs);
+      // Stay in log view to allow adding more workouts
+      setViewMode('log');
     }
   };
 
   const handleCancelWorkout = () => {
     setViewMode('calendar');
     setSelectedDate(null);
-    setCurrentLog(undefined);
+    setCurrentLogs([]);
+    setSelectedWorkoutLog(undefined);
   };
 
   const handleUpdateDetail = () => {
     loadWorkouts();
     const db = getDatabase();
     if (selectedDate) {
-      const log = db.getWorkoutLogByDate(selectedDate);
-      setCurrentLog(log);
+      const logs = db.getWorkoutLogsByDate(selectedDate);
+      setCurrentLogs(logs);
+      // Update the selected workout log if it still exists
+      if (selectedWorkoutLog) {
+        const updatedLog = logs.find(log => log.id === selectedWorkoutLog.id);
+        setSelectedWorkoutLog(updatedLog);
+      }
     }
   };
 
-  const handleDeleteWorkout = () => {
-    if (!currentLog) return;
-
+  const handleDeleteWorkout = (workoutId: string) => {
     if (confirm('Are you sure you want to delete this workout?')) {
       const db = getDatabase();
-      db.deleteWorkoutLog(currentLog.id);
+      db.deleteWorkoutLog(workoutId);
       loadWorkouts();
-      setViewMode('calendar');
-      setSelectedDate(null);
-      setCurrentLog(undefined);
+      if (selectedDate) {
+        const logs = db.getWorkoutLogsByDate(selectedDate);
+        setCurrentLogs(logs);
+        if (logs.length === 0) {
+          setViewMode('calendar');
+          setSelectedDate(null);
+        } else {
+          setViewMode('log');
+        }
+      }
+      if (selectedWorkoutLog && selectedWorkoutLog.id === workoutId) {
+        setSelectedWorkoutLog(undefined);
+        setViewMode('log');
+      }
+    }
+  };
+
+  const handleEditWorkout = (workout: WorkoutLog) => {
+    setSelectedWorkoutLog(workout);
+    if (workout.type === 'free-workout') {
+      setViewMode('detail');
     }
   };
 
@@ -115,37 +130,96 @@ export default function Home() {
 
           <div>
             {viewMode === 'log' && selectedDate && (
-              <WorkoutLogger
-                selectedDate={selectedDate}
-                existingLog={currentLog}
-                onSave={handleSaveWorkout}
-                onCancel={handleCancelWorkout}
-              />
+              <div className="space-y-6">
+                {/* Existing workouts for this date */}
+                {currentLogs.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                      Workouts on {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </h3>
+                    <div className="space-y-3">
+                      {currentLogs.map(log => (
+                        <div key={log.id} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                log.type === 'crossfit' ? 'bg-orange-500 text-white' :
+                                log.type === 'pilates' ? 'bg-purple-500 text-white' :
+                                log.type === 'squash' ? 'bg-green-500 text-white' :
+                                'bg-blue-500 text-white'
+                              }`}>
+                                {log.type === 'crossfit' ? 'Crossfit' :
+                                 log.type === 'pilates' ? 'Pilates' :
+                                 log.type === 'squash' ? 'Squash' :
+                                 'Free Workout'}
+                              </span>
+                              {log.completed && (
+                                <span className="text-green-600 text-sm font-semibold">✓ Completed</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            {log.type === 'free-workout' && (
+                              <button
+                                onClick={() => handleEditWorkout(log)}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                              >
+                                View Details
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteWorkout(log.id)}
+                              className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                              aria-label="Delete workout"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Add new workout */}
+                <WorkoutLogger
+                  selectedDate={selectedDate}
+                  onSave={handleSaveWorkout}
+                  onCancel={handleCancelWorkout}
+                />
+              </div>
             )}
 
-            {viewMode === 'detail' && currentLog && (
+            {viewMode === 'detail' && selectedWorkoutLog && (
               <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-gray-900">Free Workout Details</h2>
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={handleDeleteWorkout}
+                        onClick={() => handleDeleteWorkout(selectedWorkoutLog.id)}
                         className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete Workout
                       </button>
                       <button
-                        onClick={handleCancelWorkout}
+                        onClick={() => {
+                          setSelectedWorkoutLog(undefined);
+                          setViewMode('log');
+                        }}
                         className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
                       >
-                        Back to Calendar
+                        Back to Workouts
                       </button>
                     </div>
                   </div>
                   <p className="text-gray-600">
-                    {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
+                    {selectedDate && new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -154,7 +228,7 @@ export default function Home() {
                   </p>
                 </div>
                 <FreeWorkoutTracker
-                  workoutLog={currentLog}
+                  workoutLog={selectedWorkoutLog}
                   onUpdate={handleUpdateDetail}
                 />
               </div>
