@@ -325,8 +325,9 @@ class Database {
 
     if (!exerciseData || exerciseData.sets.length === 0) return null;
 
-    // Get the max weight used in that workout
-    const maxWeight = Math.max(...exerciseData.sets.map(set => set.weight));
+    // Get the average weight used in that workout
+    const totalWeight = exerciseData.sets.reduce((sum, set) => sum + set.weight, 0);
+    const avgWeight = totalWeight / exerciseData.sets.length;
 
     // Calculate days since last workout
     const lastWorkoutDate = new Date(lastLog.date);
@@ -336,10 +337,10 @@ class Database {
     // Only suggest increase if it's been at least 7 days since last workout
     if (daysDifference >= 7) {
       // Suggest 5% increase
-      return Math.round(maxWeight * 1.05 * 2) / 2; // Round to nearest 0.5kg
+      return Math.round(avgWeight * 1.05 * 2) / 2; // Round to nearest 0.5kg
     } else {
       // Less than a week - suggest same weight
-      return maxWeight;
+      return avgWeight;
     }
   }
 

@@ -62,6 +62,16 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
     saveWorkout(updated);
   };
 
+  const setWeightForAllSets = (exerciseIndex: number, weight: number) => {
+    const updated = [...workoutExercises];
+    updated[exerciseIndex].sets = updated[exerciseIndex].sets.map(set => ({
+      ...set,
+      weight: weight,
+    }));
+    setWorkoutExercises(updated);
+    saveWorkout(updated);
+  };
+
   const addSet = (exerciseIndex: number) => {
     const updated = [...workoutExercises];
     const lastSet = updated[exerciseIndex].sets[updated[exerciseIndex].sets.length - 1];
@@ -173,7 +183,8 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
         if (!exercise) return null;
 
         const suggestedWeight = getSuggestedWeight(exercise.id);
-        const currentMaxWeight = Math.max(...workoutEx.sets.map(s => s.weight), 0);
+        const totalWeight = workoutEx.sets.reduce((sum, set) => sum + set.weight, 0);
+        const currentAvgWeight = workoutEx.sets.length > 0 ? totalWeight / workoutEx.sets.length : 0;
 
         return (
           <div key={exIndex} className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
@@ -207,24 +218,64 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
               </button>
             </div>
 
+            {/* Set weight for all sets */}
+            <div className="mb-3 sm:mb-4 bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                Set weight for all sets
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.5"
+                  placeholder="e.g., 12"
+                  className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const value = parseFloat((e.target as HTMLInputElement).value);
+                      if (!isNaN(value)) {
+                        setWeightForAllSets(exIndex, value);
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                    const value = parseFloat(input.value);
+                    if (!isNaN(value)) {
+                      setWeightForAllSets(exIndex, value);
+                      input.value = '';
+                    }
+                  }}
+                  className="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-semibold rounded-lg transition-colors whitespace-nowrap"
+                >
+                  Apply
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Sets weight to all sets. You can still adjust individual sets below.
+              </p>
+            </div>
+
             {suggestedWeight !== null && (
               <div className="mb-3 sm:mb-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3 sm:p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                   <p className="text-xs sm:text-sm font-semibold text-gray-900">
-                    Suggested Weight: {suggestedWeight} kg
+                    Suggested Weight: {suggestedWeight} kg (avg across all sets)
                   </p>
                 </div>
                 <p className="text-xs text-gray-600">
-                  {currentMaxWeight >= suggestedWeight ? (
+                  {currentAvgWeight >= suggestedWeight ? (
                     <span className="flex items-center gap-1 text-green-700">
                       <Check className="w-3 h-3" />
-                      On track! You're meeting or exceeding the 5% progression goal.
+                      On track! Your average weight ({currentAvgWeight.toFixed(1)} kg) meets the 5% progression goal.
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-blue-700">
                       <AlertCircle className="w-3 h-3" />
-                      Try to reach this weight for progressive overload.
+                      Try to reach this average weight for progressive overload. (Current avg: {currentAvgWeight.toFixed(1)} kg)
                     </span>
                   )}
                 </p>
