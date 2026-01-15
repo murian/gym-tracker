@@ -40,9 +40,9 @@ export default function WorkoutLogger({ selectedDate, onSave, onCancel }: Workou
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
           Add Workout
         </h2>
         <button
@@ -54,20 +54,20 @@ export default function WorkoutLogger({ selectedDate, onSave, onCancel }: Workou
         </button>
       </div>
 
-      <div className="mb-6">
-        <p className="text-gray-600">{formatDate(selectedDate)}</p>
+      <div className="mb-4 sm:mb-6">
+        <p className="text-sm sm:text-base text-gray-600">{formatDate(selectedDate)}</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-3">
             Workout Type
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <button
               onClick={() => setWorkoutType('crossfit')}
               className={`
-                p-4 rounded-lg border-2 transition-all font-semibold
+                p-3 sm:p-4 rounded-lg border-2 transition-all font-semibold text-sm sm:text-base
                 ${workoutType === 'crossfit'
                   ? 'border-orange-500 bg-orange-50 text-orange-700'
                   : 'border-gray-200 hover:border-orange-300 text-gray-700'}
@@ -78,7 +78,7 @@ export default function WorkoutLogger({ selectedDate, onSave, onCancel }: Workou
             <button
               onClick={() => setWorkoutType('pilates')}
               className={`
-                p-4 rounded-lg border-2 transition-all font-semibold
+                p-3 sm:p-4 rounded-lg border-2 transition-all font-semibold text-sm sm:text-base
                 ${workoutType === 'pilates'
                   ? 'border-purple-500 bg-purple-50 text-purple-700'
                   : 'border-gray-200 hover:border-purple-300 text-gray-700'}
@@ -89,7 +89,7 @@ export default function WorkoutLogger({ selectedDate, onSave, onCancel }: Workou
             <button
               onClick={() => setWorkoutType('squash')}
               className={`
-                p-4 rounded-lg border-2 transition-all font-semibold
+                p-3 sm:p-4 rounded-lg border-2 transition-all font-semibold text-sm sm:text-base
                 ${workoutType === 'squash'
                   ? 'border-green-500 bg-green-50 text-green-700'
                   : 'border-gray-200 hover:border-green-300 text-gray-700'}
@@ -100,7 +100,7 @@ export default function WorkoutLogger({ selectedDate, onSave, onCancel }: Workou
             <button
               onClick={() => setWorkoutType('free-workout')}
               className={`
-                p-4 rounded-lg border-2 transition-all font-semibold
+                p-3 sm:p-4 rounded-lg border-2 transition-all font-semibold text-sm sm:text-base
                 ${workoutType === 'free-workout'
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-200 hover:border-blue-300 text-gray-700'}

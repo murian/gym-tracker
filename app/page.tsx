@@ -100,26 +100,26 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <header className="mb-8 flex items-center justify-between">
+        <header className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-3 rounded-xl shadow-lg">
               <Dumbbell className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">Gym Tracker</h1>
-              <p className="text-gray-600">Track your fitness journey</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Gym Tracker</h1>
+              <p className="text-gray-600 text-sm sm:text-base">Track your fitness journey</p>
             </div>
           </div>
           <button
             onClick={() => setShowExerciseManager(true)}
-            className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-md transition-colors border border-gray-200"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-md transition-colors border border-gray-200"
           >
             <Settings className="w-5 h-5" />
             Manage Exercises
           </button>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div>
             <Calendar
               workoutLogs={workoutLogs}
@@ -133,8 +133,8 @@ export default function Home() {
               <div className="space-y-6">
                 {/* Existing workouts for this date */}
                 {currentLogs.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                       Workouts on {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
                         weekday: 'long',
                         month: 'long',
@@ -143,10 +143,10 @@ export default function Home() {
                     </h3>
                     <div className="space-y-3">
                       {currentLogs.map(log => (
-                        <div key={log.id} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        <div key={log.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex-1 w-full">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
                                 log.type === 'crossfit' ? 'bg-orange-500 text-white' :
                                 log.type === 'pilates' ? 'bg-purple-500 text-white' :
                                 log.type === 'squash' ? 'bg-green-500 text-white' :
@@ -158,15 +158,15 @@ export default function Home() {
                                  'Free Workout'}
                               </span>
                               {log.completed && (
-                                <span className="text-green-600 text-sm font-semibold">✓ Completed</span>
+                                <span className="text-green-600 text-xs sm:text-sm font-semibold">✓ Completed</span>
                               )}
                             </div>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 w-full sm:w-auto">
                             {log.type === 'free-workout' && (
                               <button
                                 onClick={() => handleEditWorkout(log)}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
                               >
                                 View Details
                               </button>
