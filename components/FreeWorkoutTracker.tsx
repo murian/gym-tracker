@@ -307,15 +307,6 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
                       placeholder="Weight"
                     />
                     <span className="text-xs sm:text-sm text-gray-600 flex-shrink-0">kg</span>
-                    <span className="text-gray-400 text-xs sm:text-sm">×</span>
-                    <input
-                      type="number"
-                      value={set.restTime}
-                      onChange={(e) => updateSet(exIndex, setIndex, { restTime: parseInt(e.target.value) || 0 })}
-                      className="w-14 sm:w-20 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Rest"
-                    />
-                    <span className="text-xs sm:text-sm text-gray-600 flex-shrink-0">sec</span>
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <label className="flex items-center gap-2 cursor-pointer flex-1 sm:flex-initial">
