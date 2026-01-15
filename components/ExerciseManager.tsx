@@ -10,6 +10,7 @@ interface ExerciseManagerProps {
 
 export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [dayFilter, setDayFilter] = useState<'all' | 1 | 2>('all');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
     defaultSets: 3,
     defaultRestTime: 30,
     imageUrl: '',
+    workoutDay: 1 as 1 | 2,
   });
 
   useEffect(() => {
@@ -30,6 +32,11 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
     const db = getDatabase();
     setExercises(db.getExercises());
   };
+
+  const filteredExercises = exercises.filter(exercise => {
+    if (dayFilter === 'all') return true;
+    return exercise.workoutDay === dayFilter;
+  });
 
   const handleAdd = () => {
     if (!formData.name) return;
@@ -43,6 +50,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultSets: formData.defaultSets,
       defaultRestTime: formData.defaultRestTime,
       imageUrl: formData.imageUrl || undefined,
+      workoutDay: formData.workoutDay,
     });
 
     resetForm();
@@ -59,6 +67,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultSets: exercise.defaultSets || 3,
       defaultRestTime: exercise.defaultRestTime || 30,
       imageUrl: exercise.imageUrl || '',
+      workoutDay: exercise.workoutDay || 1,
     });
   };
 
@@ -74,6 +83,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultSets: formData.defaultSets,
       defaultRestTime: formData.defaultRestTime,
       imageUrl: formData.imageUrl || undefined,
+      workoutDay: formData.workoutDay,
     });
 
     resetForm();
@@ -97,6 +107,7 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
       defaultSets: 3,
       defaultRestTime: 30,
       imageUrl: '',
+      workoutDay: 1,
     });
     setIsAdding(false);
     setEditingId(null);
@@ -158,6 +169,19 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., Chest, Back, Legs"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Workout Day *
+                  </label>
+                  <select
+                    value={formData.workoutDay}
+                    onChange={(e) => setFormData({ ...formData, workoutDay: parseInt(e.target.value) as 1 | 2 })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value={1}>Day 1</option>
+                    <option value={2}>Day 2</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -245,18 +269,54 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
             </button>
           )}
 
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setDayFilter('all')}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                dayFilter === 'all'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              All Exercises ({exercises.length})
+            </button>
+            <button
+              onClick={() => setDayFilter(1)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                dayFilter === 1
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+              }`}
+            >
+              Day 1 ({exercises.filter(e => e.workoutDay === 1).length})
+            </button>
+            <button
+              onClick={() => setDayFilter(2)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                dayFilter === 2
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+              }`}
+            >
+              Day 2 ({exercises.filter(e => e.workoutDay === 2).length})
+            </button>
+          </div>
+
           <div className="space-y-3">
-            {exercises.map(exercise => (
+            {filteredExercises.map(exercise => (
               <div
                 key={exercise.id}
                 className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 flex items-center justify-between transition-colors"
               >
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">
+                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                     {exercise.equipment && (
                       <span className="text-sm font-normal text-gray-500">{exercise.equipment} - </span>
                     )}
                     {exercise.name}
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${exercise.workoutDay === 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                      Day {exercise.workoutDay || 1}
+                    </span>
                   </h4>
                   <div className="flex gap-4 mt-1 text-sm text-gray-600">
                     {exercise.category && <span>Category: {exercise.category}</span>}
@@ -284,9 +344,12 @@ export default function ExerciseManager({ onClose }: ExerciseManagerProps) {
             ))}
           </div>
 
-          {exercises.length === 0 && (
+          {filteredExercises.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              No exercises yet. Add your first exercise above.
+              {exercises.length === 0
+                ? 'No exercises yet. Add your first exercise above.'
+                : `No exercises for ${dayFilter === 'all' ? 'this filter' : `Day ${dayFilter}`}.`
+              }
             </div>
           )}
         </div>

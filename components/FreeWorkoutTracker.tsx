@@ -11,6 +11,7 @@ interface FreeWorkoutTrackerProps {
 
 export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkoutTrackerProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [dayFilter, setDayFilter] = useState<'all' | 1 | 2>('all');
   const [workoutExercises, setWorkoutExercises] = useState<FreeWorkoutExercise[]>(
     workoutLog.exercises || []
   );
@@ -98,14 +99,50 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
     return exercises.find(e => e.id === exerciseId);
   };
 
-  const availableExercises = exercises.filter(
-    e => !workoutExercises.some(we => we.exerciseId === e.id)
-  );
+  const availableExercises = exercises.filter(e => {
+    const notAlreadyAdded = !workoutExercises.some(we => we.exerciseId === e.id);
+    const matchesDay = dayFilter === 'all' || e.workoutDay === dayFilter;
+    return notAlreadyAdded && matchesDay;
+  });
 
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-4">Add Exercise</h3>
+
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setDayFilter('all')}
+            className={`px-3 py-1.5 text-sm rounded-lg font-semibold transition-colors ${
+              dayFilter === 'all'
+                ? 'bg-gray-800 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            All Days
+          </button>
+          <button
+            onClick={() => setDayFilter(1)}
+            className={`px-3 py-1.5 text-sm rounded-lg font-semibold transition-colors ${
+              dayFilter === 1
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+            }`}
+          >
+            Day 1
+          </button>
+          <button
+            onClick={() => setDayFilter(2)}
+            className={`px-3 py-1.5 text-sm rounded-lg font-semibold transition-colors ${
+              dayFilter === 2
+                ? 'bg-purple-600 text-white'
+                : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+            }`}
+          >
+            Day 2
+          </button>
+        </div>
+
         <div className="flex gap-3">
           <select
             value={selectedExerciseId}
@@ -116,6 +153,7 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
             {availableExercises.map(exercise => (
               <option key={exercise.id} value={exercise.id}>
                 {exercise.equipment ? `${exercise.equipment} - ${exercise.name}` : exercise.name}
+                {exercise.workoutDay ? ` (Day ${exercise.workoutDay})` : ''}
               </option>
             ))}
           </select>
