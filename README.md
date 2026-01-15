@@ -10,9 +10,9 @@ A modern, fast, and responsive gym workout tracking application built with Next.
   - **Pilates** (Purple badge): Simple activity logging
   - **Squash** (Green badge): Simple activity logging
   - **Free Workout** (Blue badge): Detailed exercise tracking with sets, reps, and weights
-- **Day 1/Day 2 Workout Split**: Organize exercises into two separate workout days for better programming
+- **Workout 1/Workout 2 Split**: Organize exercises into two separate workout types for better programming
 - **Exercise Management**: Add, edit, and delete exercises with custom equipment, categories, and images
-- **Exercise Day Filtering**: Filter and view exercises by Day 1, Day 2, or all exercises
+- **Exercise Filtering**: Filter and view exercises by Workout 1, Workout 2, or all exercises
 - **Exercise Images**: Visual thumbnails for each exercise (96x96px) in workout tracker
 - **Progressive Overload**: Automatic 5% weight increase suggestions every week
 - **Smart Progression Tracking**:
@@ -122,16 +122,16 @@ nvm use 18
 
 ### Pre-loaded Exercises
 
-The app comes with 10 default exercises split into 2 workout days (with images):
+The app comes with 10 default exercises split into 2 workout types (with images):
 
-**Day 1 - Chest, Shoulders, & Triceps** (5 exercises):
+**Workout 1 - Chest, Shoulders, & Triceps** (5 exercises):
 - **Dumbbell Press** - 4 sets × 10 reps (Chest)
 - **Overhead Press** - 3 sets × 10 reps (Shoulders)
 - **Inclined Dumbbell Press** - 3 sets × 10 reps (Chest)
 - **Lateral Raises** - 3 sets × 15 reps (Shoulders)
 - **Triceps Dips** - 3 sets × 10 reps (Triceps)
 
-**Day 2 - Back & Biceps** (5 exercises):
+**Workout 2 - Back & Biceps** (5 exercises):
 - **Pull-ups or Lat Pulldown** - 4 sets × 8-10 reps (Back)
 - **Barbell or Dumbbell Rows** - 4 sets × 8-10 reps (Back)
 - **Face Pulls** - 3 sets × 15 reps (Shoulders)

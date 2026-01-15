@@ -15,7 +15,7 @@ export interface Exercise {
   goalSpeed?: number;
   goalIncline?: number;
   imageUrl?: string;
-  workoutDay?: 1 | 2; // Day 1 or Day 2 workout split
+  workoutDay?: 1 | 2; // Workout 1 or Workout 2 split
 }
 
 export interface ExerciseSet {
@@ -57,6 +57,8 @@ class Database {
 
       if (exercisesData) {
         this.exercises = JSON.parse(exercisesData);
+        // Migration: Add workoutDay to exercises that don't have it
+        this.migrateExercisesToWorkoutDays();
       } else {
         this.initializeDefaultExercises();
       }
@@ -69,6 +71,23 @@ class Database {
     } catch (error) {
       console.error('Error loading from storage:', error);
       this.initializeDefaultExercises();
+    }
+  }
+
+  private migrateExercisesToWorkoutDays() {
+    let needsSave = false;
+
+    this.exercises = this.exercises.map(exercise => {
+      // If exercise doesn't have workoutDay, assign it to Workout 1 by default
+      if (exercise.workoutDay === undefined) {
+        needsSave = true;
+        return { ...exercise, workoutDay: 1 as 1 | 2 };
+      }
+      return exercise;
+    });
+
+    if (needsSave) {
+      this.saveToStorage();
     }
   }
 
@@ -140,7 +159,7 @@ class Database {
         imageUrl: '/images/exercises/triceps-dips.jpg',
         workoutDay: 1,
       },
-      // Day 2 Exercises
+      // Workout 2 Exercises
       {
         id: 'lat-pulldown',
         name: 'Pull-ups or Lat Pulldown',
@@ -254,6 +273,10 @@ class Database {
 
   getWorkoutLogByDate(date: string): WorkoutLog | undefined {
     return this.workoutLogs.find(log => log.date === date);
+  }
+
+  getWorkoutLogsByDate(date: string): WorkoutLog[] {
+    return this.workoutLogs.filter(log => log.date === date);
   }
 
   addWorkoutLog(log: Omit<WorkoutLog, 'id'>): WorkoutLog {
