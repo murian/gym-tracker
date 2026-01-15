@@ -57,6 +57,8 @@ class Database {
 
       if (exercisesData) {
         this.exercises = JSON.parse(exercisesData);
+        // Migration: Add workoutDay to exercises that don't have it
+        this.migrateExercisesToWorkoutDays();
       } else {
         this.initializeDefaultExercises();
       }
@@ -69,6 +71,23 @@ class Database {
     } catch (error) {
       console.error('Error loading from storage:', error);
       this.initializeDefaultExercises();
+    }
+  }
+
+  private migrateExercisesToWorkoutDays() {
+    let needsSave = false;
+
+    this.exercises = this.exercises.map(exercise => {
+      // If exercise doesn't have workoutDay, assign it to Day 1 by default
+      if (exercise.workoutDay === undefined) {
+        needsSave = true;
+        return { ...exercise, workoutDay: 1 as 1 | 2 };
+      }
+      return exercise;
+    });
+
+    if (needsSave) {
+      this.saveToStorage();
     }
   }
 
