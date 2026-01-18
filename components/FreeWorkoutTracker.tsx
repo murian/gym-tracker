@@ -2,11 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { WorkoutLog, Exercise, ExerciseSet, FreeWorkoutExercise, getDatabase } from '@/lib/db';
-import { Plus, Trash2, Check, TrendingUp, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Check, TrendingUp, AlertCircle, Play, Pause, RotateCcw } from 'lucide-react';
 
 interface FreeWorkoutTrackerProps {
   workoutLog: WorkoutLog;
   onUpdate: () => void;
+}
+
+interface TimerState {
+  isRunning: boolean;
+  timeElapsed: number; // in seconds
+  isBreak: boolean;
+  breakTimeLeft: number; // in seconds
 }
 
 export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkoutTrackerProps) {
@@ -16,11 +23,96 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
     workoutLog.exercises || []
   );
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
+  const [timers, setTimers] = useState<{ [exerciseIndex: number]: TimerState }>({});
 
   useEffect(() => {
     const db = getDatabase();
     setExercises(db.getExercises());
   }, []);
+
+  // Timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimers(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(key => {
+          const exerciseIndex = parseInt(key);
+          const timer = updated[exerciseIndex];
+
+          if (timer.isRunning) {
+            if (timer.isBreak) {
+              // Countdown break time
+              if (timer.breakTimeLeft > 0) {
+                updated[exerciseIndex] = {
+                  ...timer,
+                  breakTimeLeft: timer.breakTimeLeft - 1,
+                };
+              } else {
+                // Break finished
+                updated[exerciseIndex] = {
+                  ...timer,
+                  isBreak: false,
+                  isRunning: false,
+                };
+              }
+            } else {
+              // Count up workout time
+              updated[exerciseIndex] = {
+                ...timer,
+                timeElapsed: timer.timeElapsed + 1,
+              };
+            }
+          }
+        });
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const startTimer = (exerciseIndex: number) => {
+    setTimers(prev => ({
+      ...prev,
+      [exerciseIndex]: prev[exerciseIndex]
+        ? { ...prev[exerciseIndex], isRunning: true }
+        : { isRunning: true, timeElapsed: 0, isBreak: false, breakTimeLeft: 60 },
+    }));
+  };
+
+  const pauseTimer = (exerciseIndex: number) => {
+    setTimers(prev => ({
+      ...prev,
+      [exerciseIndex]: prev[exerciseIndex]
+        ? { ...prev[exerciseIndex], isRunning: false }
+        : { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60 },
+    }));
+  };
+
+  const resetTimer = (exerciseIndex: number) => {
+    setTimers(prev => ({
+      ...prev,
+      [exerciseIndex]: { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60 },
+    }));
+  };
+
+  const startBreak = (exerciseIndex: number) => {
+    setTimers(prev => ({
+      ...prev,
+      [exerciseIndex]: {
+        isRunning: true,
+        timeElapsed: prev[exerciseIndex]?.timeElapsed || 0,
+        isBreak: true,
+        breakTimeLeft: 60,
+      },
+    }));
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const addExercise = () => {
     if (!selectedExerciseId) return;
@@ -54,12 +146,22 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
 
   const updateSet = (exerciseIndex: number, setIndex: number, updates: Partial<ExerciseSet>) => {
     const updated = [...workoutExercises];
+    const oldSet = updated[exerciseIndex].sets[setIndex];
     updated[exerciseIndex].sets[setIndex] = {
-      ...updated[exerciseIndex].sets[setIndex],
+      ...oldSet,
       ...updates,
     };
     setWorkoutExercises(updated);
     saveWorkout(updated);
+
+    // If set was just marked as completed, start break timer
+    if (updates.completed && !oldSet.completed) {
+      const isLastSet = setIndex === updated[exerciseIndex].sets.length - 1;
+      if (!isLastSet) {
+        // Only start break if it's not the last set
+        startBreak(exerciseIndex);
+      }
+    }
   };
 
   const setWeightForAllSets = (exerciseIndex: number, weight: number) => {
@@ -226,6 +328,60 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
               >
                 <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
+            </div>
+
+            {/* Timer Section */}
+            <div className="mb-3 sm:mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1">
+                  {timers[exIndex]?.isBreak ? (
+                    <div>
+                      <div className="text-xs sm:text-sm font-semibold text-purple-700 mb-1">Break Time</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-purple-900">
+                        {formatTime(timers[exIndex]?.breakTimeLeft || 60)}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-xs sm:text-sm font-semibold text-indigo-700 mb-1">Workout Time</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-indigo-900">
+                        {formatTime(timers[exIndex]?.timeElapsed || 0)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {!timers[exIndex]?.isRunning ? (
+                    <button
+                      onClick={() => startTimer(exIndex)}
+                      className="bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 rounded-lg transition-colors"
+                      aria-label="Start timer"
+                    >
+                      <Play className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => pauseTimer(exIndex)}
+                      className="bg-orange-600 hover:bg-orange-700 text-white p-2 sm:p-3 rounded-lg transition-colors"
+                      aria-label="Pause timer"
+                    >
+                      <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => resetTimer(exIndex)}
+                    className="bg-gray-600 hover:bg-gray-700 text-white p-2 sm:p-3 rounded-lg transition-colors"
+                    aria-label="Reset timer"
+                  >
+                    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </div>
+              </div>
+              {timers[exIndex]?.isBreak && (
+                <p className="text-xs text-purple-700 mt-2">
+                  Rest between sets - you'll be ready for the next set when the timer reaches 0:00
+                </p>
+              )}
             </div>
 
             {/* Set weight for all sets */}
