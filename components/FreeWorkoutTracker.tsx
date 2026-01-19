@@ -14,6 +14,8 @@ interface TimerState {
   timeElapsed: number; // in seconds
   isBreak: boolean;
   breakTimeLeft: number; // in seconds
+  isCountdown: boolean;
+  countdownValue: number; // 3, 2, 1
 }
 
 export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkoutTrackerProps) {
@@ -40,7 +42,22 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
           const timer = updated[exerciseIndex];
 
           if (timer.isRunning) {
-            if (timer.isBreak) {
+            if (timer.isCountdown) {
+              // Countdown 3, 2, 1
+              if (timer.countdownValue > 0) {
+                updated[exerciseIndex] = {
+                  ...timer,
+                  countdownValue: timer.countdownValue - 1,
+                };
+              } else {
+                // Countdown finished, start workout timer
+                updated[exerciseIndex] = {
+                  ...timer,
+                  isCountdown: false,
+                  countdownValue: 3,
+                };
+              }
+            } else if (timer.isBreak) {
               // Countdown break time
               if (timer.breakTimeLeft > 0) {
                 updated[exerciseIndex] = {
@@ -74,9 +91,14 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
   const startTimer = (exerciseIndex: number) => {
     setTimers(prev => ({
       ...prev,
-      [exerciseIndex]: prev[exerciseIndex]
-        ? { ...prev[exerciseIndex], isRunning: true }
-        : { isRunning: true, timeElapsed: 0, isBreak: false, breakTimeLeft: 60 },
+      [exerciseIndex]: {
+        isRunning: true,
+        timeElapsed: prev[exerciseIndex]?.timeElapsed || 0,
+        isBreak: false,
+        breakTimeLeft: 60,
+        isCountdown: true,
+        countdownValue: 3,
+      },
     }));
   };
 
@@ -85,18 +107,18 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
       ...prev,
       [exerciseIndex]: prev[exerciseIndex]
         ? { ...prev[exerciseIndex], isRunning: false }
-        : { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60 },
+        : { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60, isCountdown: false, countdownValue: 3 },
     }));
   };
 
   const resetTimer = (exerciseIndex: number) => {
     setTimers(prev => ({
       ...prev,
-      [exerciseIndex]: { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60 },
+      [exerciseIndex]: { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60, isCountdown: false, countdownValue: 3 },
     }));
   };
 
-  const startBreak = (exerciseIndex: number) => {
+  const finishSet = (exerciseIndex: number) => {
     setTimers(prev => ({
       ...prev,
       [exerciseIndex]: {
@@ -104,6 +126,8 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
         timeElapsed: prev[exerciseIndex]?.timeElapsed || 0,
         isBreak: true,
         breakTimeLeft: 60,
+        isCountdown: false,
+        countdownValue: 3,
       },
     }));
   };
@@ -330,58 +354,120 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
               </button>
             </div>
 
-            {/* Timer Section */}
-            <div className="mb-3 sm:mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-3 sm:p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex-1">
-                  {timers[exIndex]?.isBreak ? (
-                    <div>
-                      <div className="text-xs sm:text-sm font-semibold text-purple-700 mb-1">Break Time</div>
-                      <div className="text-2xl sm:text-3xl font-bold text-purple-900">
+            {/* Timer Section - Apple Watch Style */}
+            <div className="mb-3 sm:mb-4 bg-black rounded-2xl p-4 sm:p-6">
+              <div className="flex flex-col items-center justify-center gap-4">
+                {/* Timer Display */}
+                <div className="flex flex-col items-center">
+                  {timers[exIndex]?.isCountdown ? (
+                    // Countdown: 3, 2, 1
+                    <div className="text-center">
+                      <div className="text-6xl sm:text-8xl font-bold text-green-400 animate-pulse">
+                        {timers[exIndex]?.countdownValue || 'GO!'}
+                      </div>
+                      <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
+                        Get Ready
+                      </div>
+                    </div>
+                  ) : timers[exIndex]?.isBreak ? (
+                    // Break Timer
+                    <div className="text-center">
+                      <div className={`text-5xl sm:text-7xl font-bold ${
+                        (timers[exIndex]?.breakTimeLeft || 60) <= 10 ? 'text-red-500 animate-pulse' : 'text-yellow-400'
+                      }`}>
                         {formatTime(timers[exIndex]?.breakTimeLeft || 60)}
                       </div>
+                      <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
+                        Rest
+                      </div>
                     </div>
                   ) : (
-                    <div>
-                      <div className="text-xs sm:text-sm font-semibold text-indigo-700 mb-1">Workout Time</div>
-                      <div className="text-2xl sm:text-3xl font-bold text-indigo-900">
+                    // Workout Timer
+                    <div className="text-center">
+                      <div className="text-5xl sm:text-7xl font-bold text-green-400">
                         {formatTime(timers[exIndex]?.timeElapsed || 0)}
+                      </div>
+                      <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
+                        Workout
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2">
+
+                {/* Control Buttons */}
+                <div className="flex gap-3 w-full">
                   {!timers[exIndex]?.isRunning ? (
+                    <>
+                      <button
+                        onClick={() => startTimer(exIndex)}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                        aria-label="Start timer"
+                      >
+                        Start
+                      </button>
+                      <button
+                        onClick={() => resetTimer(exIndex)}
+                        className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                        aria-label="Reset timer"
+                      >
+                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </button>
+                    </>
+                  ) : timers[exIndex]?.isCountdown ? (
+                    // During countdown, show nothing or a cancel button
                     <button
-                      onClick={() => startTimer(exIndex)}
-                      className="bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 rounded-lg transition-colors"
-                      aria-label="Start timer"
+                      onClick={() => resetTimer(exIndex)}
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                      aria-label="Cancel"
                     >
-                      <Play className="w-5 h-5 sm:w-6 sm:h-6" />
+                      Cancel
                     </button>
+                  ) : timers[exIndex]?.isBreak ? (
+                    // During break, show pause and skip
+                    <>
+                      <button
+                        onClick={() => pauseTimer(exIndex)}
+                        className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                        aria-label="Pause timer"
+                      >
+                        Pause
+                      </button>
+                      <button
+                        onClick={() => resetTimer(exIndex)}
+                        className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                        aria-label="Skip break"
+                      >
+                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </button>
+                    </>
                   ) : (
-                    <button
-                      onClick={() => pauseTimer(exIndex)}
-                      className="bg-orange-600 hover:bg-orange-700 text-white p-2 sm:p-3 rounded-lg transition-colors"
-                      aria-label="Pause timer"
-                    >
-                      <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
-                    </button>
+                    // During workout, show finish set and pause
+                    <>
+                      <button
+                        onClick={() => finishSet(exIndex)}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                        aria-label="Finish set"
+                      >
+                        Finish Set
+                      </button>
+                      <button
+                        onClick={() => pauseTimer(exIndex)}
+                        className="bg-orange-600 hover:bg-orange-700 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                        aria-label="Pause timer"
+                      >
+                        <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </button>
+                      <button
+                        onClick={() => resetTimer(exIndex)}
+                        className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                        aria-label="Reset timer"
+                      >
+                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </button>
+                    </>
                   )}
-                  <button
-                    onClick={() => resetTimer(exIndex)}
-                    className="bg-gray-600 hover:bg-gray-700 text-white p-2 sm:p-3 rounded-lg transition-colors"
-                    aria-label="Reset timer"
-                  >
-                    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
                 </div>
               </div>
-              {timers[exIndex]?.isBreak && (
-                <p className="text-xs text-purple-700 mt-2">
-                  Rest between sets - you'll be ready for the next set when the timer reaches 0:00
-                </p>
-              )}
             </div>
 
             {/* Set weight for all sets */}
