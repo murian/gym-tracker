@@ -170,22 +170,12 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
 
   const updateSet = (exerciseIndex: number, setIndex: number, updates: Partial<ExerciseSet>) => {
     const updated = [...workoutExercises];
-    const oldSet = updated[exerciseIndex].sets[setIndex];
     updated[exerciseIndex].sets[setIndex] = {
-      ...oldSet,
+      ...updated[exerciseIndex].sets[setIndex],
       ...updates,
     };
     setWorkoutExercises(updated);
     saveWorkout(updated);
-
-    // If set was just marked as completed, start break timer
-    if (updates.completed && !oldSet.completed) {
-      const isLastSet = setIndex === updated[exerciseIndex].sets.length - 1;
-      if (!isLastSet) {
-        // Only start break if it's not the last set
-        startBreak(exerciseIndex);
-      }
-    }
   };
 
   const setWeightForAllSets = (exerciseIndex: number, weight: number) => {
