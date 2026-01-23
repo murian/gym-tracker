@@ -157,6 +157,35 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
     setSelectedExerciseId('');
   };
 
+  const addAllWorkoutExercises = (workoutDay: 1 | 2) => {
+    const workoutDayExercises = exercises.filter(e => e.workoutDay === workoutDay);
+
+    const newWorkoutExercises = workoutDayExercises
+      .filter(exercise => !workoutExercises.some(we => we.exerciseId === exercise.id))
+      .map(exercise => {
+        const defaultSets: ExerciseSet[] = Array.from({ length: exercise.defaultSets || 3 }, () => ({
+          reps: exercise.defaultReps || 12,
+          weight: 0,
+          restTime: exercise.defaultRestTime || 30,
+          completed: false,
+        }));
+
+        return {
+          exerciseId: exercise.id,
+          sets: defaultSets,
+        };
+      });
+
+    if (newWorkoutExercises.length === 0) {
+      alert(`All Workout ${workoutDay} exercises are already added!`);
+      return;
+    }
+
+    const updated = [...workoutExercises, ...newWorkoutExercises];
+    setWorkoutExercises(updated);
+    saveWorkout(updated);
+  };
+
   const removeExercise = (index: number) => {
     const updated = workoutExercises.filter((_, i) => i !== index);
     setWorkoutExercises(updated);
@@ -230,6 +259,22 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
     <div className="space-y-4 sm:space-y-6">
       <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Add Exercise</h3>
+
+        {/* Quick Add Buttons */}
+        <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-4">
+          <button
+            onClick={() => addAllWorkoutExercises(1)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
+          >
+            + All Workout 1
+          </button>
+          <button
+            onClick={() => addAllWorkoutExercises(2)}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
+          >
+            + All Workout 2
+          </button>
+        </div>
 
         <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
           <button
@@ -425,8 +470,19 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
         const totalWeight = workoutEx.sets.reduce((sum, set) => sum + set.weight, 0);
         const currentAvgWeight = workoutEx.sets.length > 0 ? totalWeight / workoutEx.sets.length : 0;
 
+        // Check if all sets are completed
+        const allSetsCompleted = workoutEx.sets.length > 0 && workoutEx.sets.every(set => set.completed);
+
+        // Sort sets: incomplete first, completed last
+        const sortedSets = [...workoutEx.sets].sort((a, b) => {
+          if (a.completed === b.completed) return 0;
+          return a.completed ? 1 : -1;
+        });
+
         return (
-          <div key={exIndex} className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+          <div key={exIndex} className={`rounded-xl shadow-lg p-4 sm:p-6 transition-all ${
+            allSetsCompleted ? 'bg-green-50 border-2 border-green-300' : 'bg-white'
+          }`}>
             <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
               {exercise.imageUrl && (
                 <div className="flex-shrink-0">
@@ -438,11 +494,17 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <h4 className="text-base sm:text-lg font-bold text-gray-900">
+                <h4 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2 flex-wrap">
                   {exercise.equipment && (
                     <span className="text-xs sm:text-sm font-normal text-gray-500">{exercise.equipment} - </span>
                   )}
-                  {exercise.name}
+                  <span className={allSetsCompleted ? 'line-through text-gray-500' : ''}>{exercise.name}</span>
+                  {allSetsCompleted && (
+                    <span className="inline-flex items-center gap-1 bg-green-600 text-white text-xs sm:text-sm font-semibold px-2 sm:px-3 py-1 rounded-full">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                      Complete
+                    </span>
+                  )}
                 </h4>
                 {exercise.category && (
                   <p className="text-xs sm:text-sm text-gray-500">{exercise.category}</p>
@@ -522,53 +584,70 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
             )}
 
             <div className="space-y-2">
-              {workoutEx.sets.map((set, setIndex) => (
-                <div key={setIndex} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-1 w-full overflow-x-auto">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-600 w-10 sm:w-12 flex-shrink-0">
-                      Set {setIndex + 1}
-                    </span>
-                    <input
-                      type="number"
-                      value={set.reps}
-                      onChange={(e) => updateSet(exIndex, setIndex, { reps: parseInt(e.target.value) || 0 })}
-                      className="w-14 sm:w-20 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Reps"
-                    />
-                    <span className="text-xs sm:text-sm text-gray-600 flex-shrink-0">reps</span>
-                    <span className="text-gray-400 text-xs sm:text-sm">×</span>
-                    <input
-                      type="number"
-                      step="0.5"
-                      value={set.weight}
-                      onChange={(e) => updateSet(exIndex, setIndex, { weight: parseFloat(e.target.value) || 0 })}
-                      className="w-14 sm:w-20 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Weight"
-                    />
-                    <span className="text-xs sm:text-sm text-gray-600 flex-shrink-0">kg</span>
-                  </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <label className="flex items-center gap-2 cursor-pointer flex-1 sm:flex-initial">
+              {sortedSets.map((set, sortedIndex) => {
+                // Find the original index for this set
+                const originalIndex = workoutEx.sets.findIndex(s => s === set);
+
+                return (
+                  <div key={originalIndex} className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 rounded-lg transition-all ${
+                    set.completed
+                      ? 'p-1.5 sm:p-2 bg-green-100 opacity-60'
+                      : 'p-2 sm:p-3 bg-gray-50'
+                  }`}>
+                    <div className={`flex items-center gap-1.5 sm:gap-2 flex-1 w-full overflow-x-auto ${
+                      set.completed ? 'line-through text-gray-500' : ''
+                    }`}>
+                      <span className="text-xs sm:text-sm font-semibold w-10 sm:w-12 flex-shrink-0">
+                        Set {originalIndex + 1}
+                      </span>
                       <input
-                        type="checkbox"
-                        checked={set.completed}
-                        onChange={(e) => updateSet(exIndex, setIndex, { completed: e.target.checked })}
-                        className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        type="number"
+                        value={set.reps}
+                        onChange={(e) => updateSet(exIndex, originalIndex, { reps: parseInt(e.target.value) || 0 })}
+                        disabled={set.completed}
+                        className={`w-14 sm:w-20 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          set.completed ? 'bg-gray-200 cursor-not-allowed' : ''
+                        }`}
+                        placeholder="Reps"
                       />
-                      <Check className={`w-4 h-4 sm:w-5 sm:h-5 ${set.completed ? 'text-green-600' : 'text-gray-300'}`} />
-                    </label>
-                    {workoutEx.sets.length > 1 && (
-                      <button
-                        onClick={() => removeSet(exIndex, setIndex)}
-                        className="p-1.5 sm:p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                        aria-label="Remove set"
-                      >
-                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </button>
-                    )}
+                      <span className="text-xs sm:text-sm flex-shrink-0">reps</span>
+                      <span className="text-gray-400 text-xs sm:text-sm">×</span>
+                      <input
+                        type="number"
+                        step="0.5"
+                        value={set.weight}
+                        onChange={(e) => updateSet(exIndex, originalIndex, { weight: parseFloat(e.target.value) || 0 })}
+                        disabled={set.completed}
+                        className={`w-14 sm:w-20 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          set.completed ? 'bg-gray-200 cursor-not-allowed' : ''
+                        }`}
+                        placeholder="Weight"
+                      />
+                      <span className="text-xs sm:text-sm flex-shrink-0">kg</span>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <label className="flex items-center gap-2 cursor-pointer flex-1 sm:flex-initial">
+                        <input
+                          type="checkbox"
+                          checked={set.completed}
+                          onChange={(e) => updateSet(exIndex, originalIndex, { completed: e.target.checked })}
+                          className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        />
+                        <Check className={`w-4 h-4 sm:w-5 sm:h-5 ${set.completed ? 'text-green-600' : 'text-gray-300'}`} />
+                      </label>
+                      {workoutEx.sets.length > 1 && (
+                        <button
+                          onClick={() => removeSet(exIndex, originalIndex)}
+                          className="p-1.5 sm:p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                          aria-label="Remove set"
+                        >
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <button
