@@ -25,110 +25,105 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
     workoutLog.exercises || []
   );
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
-  const [timers, setTimers] = useState<{ [exerciseIndex: number]: TimerState }>({});
+  const [timer, setTimer] = useState<TimerState>({
+    isRunning: false,
+    timeElapsed: 0,
+    isBreak: false,
+    breakTimeLeft: 60,
+    isCountdown: false,
+    countdownValue: 3,
+  });
 
   useEffect(() => {
     const db = getDatabase();
     setExercises(db.getExercises());
   }, []);
 
-  // Timer effect
+  // Timer effect - Single global timer
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimers(prev => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach(key => {
-          const exerciseIndex = parseInt(key);
-          const timer = updated[exerciseIndex];
+      setTimer(prev => {
+        if (!prev.isRunning) return prev;
 
-          if (timer.isRunning) {
-            if (timer.isCountdown) {
-              // Countdown 3, 2, 1
-              if (timer.countdownValue > 0) {
-                updated[exerciseIndex] = {
-                  ...timer,
-                  countdownValue: timer.countdownValue - 1,
-                };
-              } else {
-                // Countdown finished, start workout timer
-                updated[exerciseIndex] = {
-                  ...timer,
-                  isCountdown: false,
-                  countdownValue: 3,
-                };
-              }
-            } else if (timer.isBreak) {
-              // Countdown break time
-              if (timer.breakTimeLeft > 0) {
-                updated[exerciseIndex] = {
-                  ...timer,
-                  breakTimeLeft: timer.breakTimeLeft - 1,
-                };
-              } else {
-                // Break finished
-                updated[exerciseIndex] = {
-                  ...timer,
-                  isBreak: false,
-                  isRunning: false,
-                };
-              }
-            } else {
-              // Count up workout time
-              updated[exerciseIndex] = {
-                ...timer,
-                timeElapsed: timer.timeElapsed + 1,
-              };
-            }
+        if (prev.isCountdown) {
+          // Countdown 3, 2, 1
+          if (prev.countdownValue > 0) {
+            return {
+              ...prev,
+              countdownValue: prev.countdownValue - 1,
+            };
+          } else {
+            // Countdown finished, start workout timer
+            return {
+              ...prev,
+              isCountdown: false,
+              countdownValue: 3,
+            };
           }
-        });
-        return updated;
+        } else if (prev.isBreak) {
+          // Countdown break time
+          if (prev.breakTimeLeft > 0) {
+            return {
+              ...prev,
+              breakTimeLeft: prev.breakTimeLeft - 1,
+            };
+          } else {
+            // Break finished
+            return {
+              ...prev,
+              isBreak: false,
+              isRunning: false,
+            };
+          }
+        } else {
+          // Count up workout time
+          return {
+            ...prev,
+            timeElapsed: prev.timeElapsed + 1,
+          };
+        }
       });
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const startTimer = (exerciseIndex: number) => {
-    setTimers(prev => ({
+  const startTimer = () => {
+    setTimer({
+      isRunning: true,
+      timeElapsed: 0, // Always start from 0
+      isBreak: false,
+      breakTimeLeft: 60,
+      isCountdown: true,
+      countdownValue: 3,
+    });
+  };
+
+  const pauseTimer = () => {
+    setTimer(prev => ({
       ...prev,
-      [exerciseIndex]: {
-        isRunning: true,
-        timeElapsed: prev[exerciseIndex]?.timeElapsed || 0,
-        isBreak: false,
-        breakTimeLeft: 60,
-        isCountdown: true,
-        countdownValue: 3,
-      },
+      isRunning: false,
     }));
   };
 
-  const pauseTimer = (exerciseIndex: number) => {
-    setTimers(prev => ({
-      ...prev,
-      [exerciseIndex]: prev[exerciseIndex]
-        ? { ...prev[exerciseIndex], isRunning: false }
-        : { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60, isCountdown: false, countdownValue: 3 },
-    }));
+  const resetTimer = () => {
+    setTimer({
+      isRunning: false,
+      timeElapsed: 0,
+      isBreak: false,
+      breakTimeLeft: 60,
+      isCountdown: false,
+      countdownValue: 3,
+    });
   };
 
-  const resetTimer = (exerciseIndex: number) => {
-    setTimers(prev => ({
+  const finishSet = () => {
+    setTimer(prev => ({
       ...prev,
-      [exerciseIndex]: { isRunning: false, timeElapsed: 0, isBreak: false, breakTimeLeft: 60, isCountdown: false, countdownValue: 3 },
-    }));
-  };
-
-  const finishSet = (exerciseIndex: number) => {
-    setTimers(prev => ({
-      ...prev,
-      [exerciseIndex]: {
-        isRunning: true,
-        timeElapsed: prev[exerciseIndex]?.timeElapsed || 0,
-        isBreak: true,
-        breakTimeLeft: 60,
-        isCountdown: false,
-        countdownValue: 3,
-      },
+      isRunning: true,
+      isBreak: true,
+      breakTimeLeft: 60,
+      isCountdown: false,
     }));
   };
 
@@ -304,6 +299,124 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
         </div>
       </div>
 
+      {/* Global Timer Section - Apple Watch Style */}
+      {workoutExercises.length > 0 && (
+        <div className="mb-3 sm:mb-4 bg-black rounded-2xl p-4 sm:p-6">
+          <div className="flex flex-col items-center justify-center gap-4">
+            {/* Timer Display */}
+            <div className="flex flex-col items-center">
+              {timer.isCountdown ? (
+                // Countdown: 3, 2, 1
+                <div className="text-center">
+                  <div className="text-6xl sm:text-8xl font-bold text-green-400 animate-pulse">
+                    {timer.countdownValue || 'GO!'}
+                  </div>
+                  <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
+                    Get Ready
+                  </div>
+                </div>
+              ) : timer.isBreak ? (
+                // Break Timer
+                <div className="text-center">
+                  <div className={`text-5xl sm:text-7xl font-bold ${
+                    timer.breakTimeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-yellow-400'
+                  }`}>
+                    {formatTime(timer.breakTimeLeft)}
+                  </div>
+                  <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
+                    Rest
+                  </div>
+                </div>
+              ) : (
+                // Workout Timer
+                <div className="text-center">
+                  <div className="text-5xl sm:text-7xl font-bold text-green-400">
+                    {formatTime(timer.timeElapsed)}
+                  </div>
+                  <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
+                    Workout
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Control Buttons */}
+            <div className="flex gap-3 w-full">
+              {!timer.isRunning ? (
+                <>
+                  <button
+                    onClick={startTimer}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                    aria-label="Start timer"
+                  >
+                    Start
+                  </button>
+                  <button
+                    onClick={resetTimer}
+                    className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                    aria-label="Reset timer"
+                  >
+                    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </>
+              ) : timer.isCountdown ? (
+                // During countdown, show cancel button
+                <button
+                  onClick={resetTimer}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                  aria-label="Cancel"
+                >
+                  Cancel
+                </button>
+              ) : timer.isBreak ? (
+                // During break, show pause and skip
+                <>
+                  <button
+                    onClick={pauseTimer}
+                    className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                    aria-label="Pause timer"
+                  >
+                    Pause
+                  </button>
+                  <button
+                    onClick={resetTimer}
+                    className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                    aria-label="Skip break"
+                  >
+                    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </>
+              ) : (
+                // During workout, show finish set and pause
+                <>
+                  <button
+                    onClick={finishSet}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
+                    aria-label="Finish set"
+                  >
+                    Finish Set
+                  </button>
+                  <button
+                    onClick={pauseTimer}
+                    className="bg-orange-600 hover:bg-orange-700 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                    aria-label="Pause timer"
+                  >
+                    <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                  <button
+                    onClick={resetTimer}
+                    className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
+                    aria-label="Reset timer"
+                  >
+                    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {workoutExercises.map((workoutEx, exIndex) => {
         const exercise = getExerciseInfo(workoutEx.exerciseId);
         if (!exercise) return null;
@@ -342,122 +455,6 @@ export default function FreeWorkoutTracker({ workoutLog, onUpdate }: FreeWorkout
               >
                 <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-            </div>
-
-            {/* Timer Section - Apple Watch Style */}
-            <div className="mb-3 sm:mb-4 bg-black rounded-2xl p-4 sm:p-6">
-              <div className="flex flex-col items-center justify-center gap-4">
-                {/* Timer Display */}
-                <div className="flex flex-col items-center">
-                  {timers[exIndex]?.isCountdown ? (
-                    // Countdown: 3, 2, 1
-                    <div className="text-center">
-                      <div className="text-6xl sm:text-8xl font-bold text-green-400 animate-pulse">
-                        {timers[exIndex]?.countdownValue || 'GO!'}
-                      </div>
-                      <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
-                        Get Ready
-                      </div>
-                    </div>
-                  ) : timers[exIndex]?.isBreak ? (
-                    // Break Timer
-                    <div className="text-center">
-                      <div className={`text-5xl sm:text-7xl font-bold ${
-                        (timers[exIndex]?.breakTimeLeft || 60) <= 10 ? 'text-red-500 animate-pulse' : 'text-yellow-400'
-                      }`}>
-                        {formatTime(timers[exIndex]?.breakTimeLeft || 60)}
-                      </div>
-                      <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
-                        Rest
-                      </div>
-                    </div>
-                  ) : (
-                    // Workout Timer
-                    <div className="text-center">
-                      <div className="text-5xl sm:text-7xl font-bold text-green-400">
-                        {formatTime(timers[exIndex]?.timeElapsed || 0)}
-                      </div>
-                      <div className="text-sm sm:text-base text-gray-400 mt-2 uppercase tracking-wide">
-                        Workout
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Control Buttons */}
-                <div className="flex gap-3 w-full">
-                  {!timers[exIndex]?.isRunning ? (
-                    <>
-                      <button
-                        onClick={() => startTimer(exIndex)}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
-                        aria-label="Start timer"
-                      >
-                        Start
-                      </button>
-                      <button
-                        onClick={() => resetTimer(exIndex)}
-                        className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
-                        aria-label="Reset timer"
-                      >
-                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </button>
-                    </>
-                  ) : timers[exIndex]?.isCountdown ? (
-                    // During countdown, show nothing or a cancel button
-                    <button
-                      onClick={() => resetTimer(exIndex)}
-                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
-                      aria-label="Cancel"
-                    >
-                      Cancel
-                    </button>
-                  ) : timers[exIndex]?.isBreak ? (
-                    // During break, show pause and skip
-                    <>
-                      <button
-                        onClick={() => pauseTimer(exIndex)}
-                        className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
-                        aria-label="Pause timer"
-                      >
-                        Pause
-                      </button>
-                      <button
-                        onClick={() => resetTimer(exIndex)}
-                        className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
-                        aria-label="Skip break"
-                      >
-                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </button>
-                    </>
-                  ) : (
-                    // During workout, show finish set and pause
-                    <>
-                      <button
-                        onClick={() => finishSet(exIndex)}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-full transition-all transform hover:scale-105 font-semibold text-sm sm:text-base uppercase tracking-wide shadow-lg"
-                        aria-label="Finish set"
-                      >
-                        Finish Set
-                      </button>
-                      <button
-                        onClick={() => pauseTimer(exIndex)}
-                        className="bg-orange-600 hover:bg-orange-700 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
-                        aria-label="Pause timer"
-                      >
-                        <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </button>
-                      <button
-                        onClick={() => resetTimer(exIndex)}
-                        className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full transition-all transform hover:scale-105 shadow-lg"
-                        aria-label="Reset timer"
-                      >
-                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
             </div>
 
             {/* Set weight for all sets */}
