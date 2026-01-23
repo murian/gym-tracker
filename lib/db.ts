@@ -86,6 +86,77 @@ class Database {
       return exercise;
     });
 
+    // Check if Workout 2 exercises exist, if not, add them from defaults
+    const hasWorkout2 = this.exercises.some(e => e.workoutDay === 2);
+    if (!hasWorkout2) {
+      // Get the default Workout 2 exercises
+      const defaultWorkout2Exercises = [
+        {
+          id: 'lat-pulldown',
+          name: 'Pull-ups or Lat Pulldown',
+          equipment: 'CABLE / BAR',
+          category: 'Back',
+          defaultReps: 10,
+          defaultSets: 4,
+          defaultRestTime: 60,
+          imageUrl: '/images/exercises/lat-pulldown.jpg',
+          workoutDay: 2 as 1 | 2,
+        },
+        {
+          id: 'barbell-rows',
+          name: 'Barbell or Dumbbell Rows',
+          equipment: 'BARBELL / DUMBBELLS',
+          category: 'Back',
+          defaultReps: 10,
+          defaultSets: 4,
+          defaultRestTime: 60,
+          imageUrl: '/images/exercises/barbell-rows.jpg',
+          workoutDay: 2 as 1 | 2,
+        },
+        {
+          id: 'face-pulls',
+          name: 'Face Pulls',
+          equipment: 'CABLE',
+          category: 'Shoulders',
+          defaultReps: 15,
+          defaultSets: 3,
+          defaultRestTime: 45,
+          imageUrl: '/images/exercises/face-pulls.jpg',
+          workoutDay: 2 as 1 | 2,
+        },
+        {
+          id: 'bicep-curls',
+          name: 'Bicep Curls',
+          equipment: 'DUMBBELLS',
+          category: 'Biceps',
+          defaultReps: 11,
+          defaultSets: 3,
+          defaultRestTime: 45,
+          imageUrl: '/images/exercises/bicep-curls.jpg',
+          workoutDay: 2 as 1 | 2,
+        },
+        {
+          id: 'hammer-curls',
+          name: 'Hammer Curls',
+          equipment: 'DUMBBELLS',
+          category: 'Biceps',
+          defaultReps: 12,
+          defaultSets: 2,
+          defaultRestTime: 45,
+          imageUrl: '/images/exercises/hammer-curls.jpg',
+          workoutDay: 2 as 1 | 2,
+        },
+      ];
+
+      // Add only exercises that don't already exist
+      defaultWorkout2Exercises.forEach(defaultEx => {
+        if (!this.exercises.find(e => e.id === defaultEx.id)) {
+          this.exercises.push(defaultEx);
+          needsSave = true;
+        }
+      });
+    }
+
     if (needsSave) {
       this.saveToStorage();
     }
